@@ -2,14 +2,8 @@
    GlocalCoach 2026 — Application Logic
    ============================================ */
 
-// ─── DATA STORE ───
-var STORAGE_KEY = 'glocalcoach2026';
-
-function loadData() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData();
-  } catch (e) { return defaultData(); }
-}
+// ─── FIRESTORE DATA STORE ───
+var currentUserUid = null;
 
 function defaultData() {
   return {
@@ -20,9 +14,78 @@ function defaultData() {
   };
 }
 
-function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+var appData = defaultData();
 
-var appData = loadData();
+// Save data to Firestore (fire-and-forget, non-blocking)
+function saveData(d) {
+  if (!currentUserUid || typeof db === 'undefined') return;
+  db.collection('users').doc(currentUserUid).update({
+    sessions: d.sessions || [],
+    totalHours: d.totalHours || 0,
+    coachName: d.coachName || '',
+    coachCity: d.coachCity || 'Toronto'
+  }).catch(function (err) {
+    console.error('Firestore save error:', err);
+  });
+}
+
+// ─── RELOAD DATA FOR A SPECIFIC USER (called by auth.js) ───
+function reloadUserData(uid, name) {
+  currentUserUid = uid;
+
+  if (!uid || typeof db === 'undefined') {
+    appData = defaultData();
+    refreshAppUI();
+    return;
+  }
+
+  // Read user data from Firestore
+  db.collection('users').doc(uid).get().then(function (doc) {
+    if (doc.exists) {
+      var data = doc.data();
+      appData = {
+        sessions: data.sessions || [],
+        totalHours: data.totalHours || 0,
+        coachName: data.coachName || '',
+        coachCity: data.coachCity || 'Toronto'
+      };
+    } else {
+      // New user — create default doc
+      appData = defaultData();
+      if (name) appData.coachName = name;
+    }
+    refreshAppUI();
+  }).catch(function (err) {
+    console.error('Firestore load error:', err);
+    appData = defaultData();
+    refreshAppUI();
+  });
+}
+
+// Refresh all UI after data loads
+function refreshAppUI() {
+  updateSoulMeter();
+  updateHoursRing();
+
+  var coachNameInput = document.getElementById('coachName');
+  if (coachNameInput) coachNameInput.value = appData.coachName || '';
+  var coachCityInput = document.getElementById('coachCity');
+  if (coachCityInput) coachCityInput.value = appData.coachCity || 'Toronto';
+
+  currentCard = 0;
+  ratings = {};
+  var allStars = document.querySelectorAll('.star');
+  for (var i = 0; i < allStars.length; i++) allStars[i].classList.remove('active');
+  var labels = document.querySelectorAll('.rating-label');
+  for (var j = 0; j < labels.length; j++) labels[j].textContent = 'Tap to rate';
+  showCard(0);
+
+  var dashTab = document.getElementById('tabDashboard');
+  if (dashTab && dashTab.classList.contains('active')) {
+    setTimeout(drawDashboard, 50);
+  }
+}
+
 
 // ─── UTILITY ───
 function showToast(msg) {
@@ -71,6 +134,10 @@ function switchTab(tabId) {
   // Draw dashboard if switching to it
   if (tabId === 'tabDashboard') {
     setTimeout(drawDashboard, 50);
+  }
+  // Render admin panel if switching to it
+  if (tabId === 'tabAdmin') {
+    setTimeout(renderAdminPanel, 50);
   }
 }
 
@@ -710,3 +777,474 @@ function initLedger() {
     printBtn.addEventListener('click', function () { window.print(); });
   }
 }
+
+// ════════════════════════════════════════════
+//  FEATURE 5: ADMIN PANEL
+// ════════════════════════════════════════════
+
+// Show/hide tabs based on user role
+function updateAdminVisibility(role) {
+  var adminBtn = document.getElementById('adminNavBtn');
+  var navItems = document.querySelectorAll('.nav-item:not(.admin-nav-item)');
+
+  if (role === 'admin') {
+    // Admin: show ONLY the admin tab
+    if (adminBtn) adminBtn.style.display = 'flex';
+    for (var i = 0; i < navItems.length; i++) {
+      navItems[i].style.display = 'none';
+    }
+    // Auto-switch to admin tab
+    switchTab('tabAdmin');
+  } else {
+    // Non-admin: show all tabs except admin
+    if (adminBtn) adminBtn.style.display = 'none';
+    for (var j = 0; j < navItems.length; j++) {
+      navItems[j].style.display = 'flex';
+    }
+    // Switch to Quick-Log
+    switchTab('tabQuickLog');
+  }
+}
+
+// Gather all user data from Firestore
+function getAllUsersData() {
+  if (typeof db === 'undefined') return Promise.resolve([]);
+  return db.collection('users').get().then(function (snapshot) {
+    var result = [];
+    snapshot.forEach(function (doc) {
+      var d = doc.data();
+      result.push({
+        uid: doc.id,
+        name: d.name || '',
+        email: d.email || '',
+        role: d.role || 'coach',
+        createdAt: d.createdAt || '',
+        sessions: d.sessions || [],
+        totalHours: d.totalHours || 0,
+        coachName: d.coachName || '',
+        coachCity: d.coachCity || 'Toronto'
+      });
+    });
+    return result;
+  }).catch(function (err) {
+    console.error('Error loading users:', err);
+    return [];
+  });
+}
+
+// Compute average rating from sessions array
+function computeAvgRating(sessions) {
+  if (!sessions || sessions.length === 0) return 0;
+  var total = 0, count = 0;
+  for (var i = 0; i < sessions.length; i++) {
+    var vals = Object.values(sessions[i].ratings || {});
+    for (var v = 0; v < vals.length; v++) {
+      total += vals[v];
+      count++;
+    }
+  }
+  return count > 0 ? (total / count) : 0;
+}
+
+// Get initials for admin display
+function adminInitials(name) {
+  if (!name) return '??';
+  var parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return name.substring(0, 2).toUpperCase();
+}
+
+// Role colors
+var adminRoleColors = {
+  coach: { bg: 'rgba(45,212,191,0.12)', border: 'rgba(45,212,191,0.3)', text: '#2dd4bf' },
+  admin: { bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.3)', text: '#3b82f6' },
+  athlete: { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)', text: '#f59e0b' }
+};
+
+// Render the full admin panel
+function renderAdminPanel() {
+  var listEl = document.getElementById('adminUsersList');
+  if (listEl) listEl.innerHTML = '<p class="admin-empty">Loading users...</p>';
+
+  getAllUsersData().then(function (allUsers) {
+    if (allUsers.length === 0) {
+      if (listEl) listEl.innerHTML = '<p class="admin-empty">No users found. Create some accounts first!</p>';
+      return;
+    }
+    renderAdminPanelWithData(allUsers);
+  }).catch(function (err) {
+    console.error('Admin panel error:', err);
+    if (listEl) listEl.innerHTML = '<p class="admin-empty">⚠️ Error loading users: ' + (err.message || 'Check Firestore rules') + '</p>';
+  });
+}
+
+function renderAdminPanelWithData(allUsers) {
+
+  // ── Overview Stats ──
+  var totalUsers = allUsers.length;
+  var totalSessions = 0;
+  var totalHours = 0;
+  var allRatingsTotal = 0;
+  var allRatingsCount = 0;
+  var roleCounts = { coach: 0, admin: 0, athlete: 0 };
+
+  for (var i = 0; i < allUsers.length; i++) {
+    var u = allUsers[i];
+    totalSessions += u.sessions.length;
+    totalHours += u.totalHours;
+    roleCounts[u.role] = (roleCounts[u.role] || 0) + 1;
+    for (var s = 0; s < u.sessions.length; s++) {
+      var vals = Object.values(u.sessions[s].ratings || {});
+      for (var v = 0; v < vals.length; v++) {
+        allRatingsTotal += vals[v];
+        allRatingsCount++;
+      }
+    }
+  }
+
+  var globalAvg = allRatingsCount > 0 ? (allRatingsTotal / allRatingsCount).toFixed(1) : '—';
+
+  var elTotalUsers = document.getElementById('statTotalUsers');
+  var elTotalSessions = document.getElementById('statTotalSessions');
+  var elAvgRating = document.getElementById('statAvgRating');
+  var elTotalHours = document.getElementById('statTotalHours');
+  if (elTotalUsers) elTotalUsers.textContent = totalUsers;
+  if (elTotalSessions) elTotalSessions.textContent = totalSessions;
+  if (elAvgRating) elAvgRating.textContent = globalAvg;
+  if (elTotalHours) elTotalHours.textContent = totalHours;
+
+  // ── Role Distribution Bars ──
+  var roleBarsEl = document.getElementById('adminRoleBars');
+  if (roleBarsEl) {
+    var roleHtml = '';
+    var roles = ['coach', 'admin', 'athlete'];
+    var roleLabels = { coach: '🏆 Coaches', admin: '⚙️ Admins', athlete: '⚽ Athletes' };
+    for (var r = 0; r < roles.length; r++) {
+      var roleName = roles[r];
+      var count = roleCounts[roleName] || 0;
+      var pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
+      var colors = adminRoleColors[roleName];
+      roleHtml += '<div class="admin-role-row">' +
+        '<span class="admin-role-label">' + roleLabels[roleName] + '</span>' +
+        '<div class="admin-role-bar-track">' +
+        '<div class="admin-role-bar-fill" style="width:' + pct + '%;background:' + colors.text + '"></div>' +
+        '</div>' +
+        '<span class="admin-role-count" style="color:' + colors.text + '">' + count + '</span>' +
+        '</div>';
+    }
+    roleBarsEl.innerHTML = roleHtml;
+  }
+
+  // ── Users List ──
+  var filterEl = document.getElementById('adminRoleFilter');
+  var filter = filterEl ? filterEl.value : 'all';
+  renderAdminUsersList(allUsers, filter);
+
+  // Attach filter change
+  if (filterEl && !filterEl._adminBound) {
+    filterEl._adminBound = true;
+    filterEl.addEventListener('change', function () {
+      getAllUsersData().then(function (users) {
+        renderAdminUsersList(users, filterEl.value);
+      });
+    });
+  }
+
+  // Modal close
+  var modalClose = document.getElementById('modalClose');
+  if (modalClose && !modalClose._bound) {
+    modalClose._bound = true;
+    modalClose.addEventListener('click', closeAdminModal);
+  }
+  var modalOverlay = document.getElementById('adminModal');
+  if (modalOverlay && !modalOverlay._bound) {
+    modalOverlay._bound = true;
+    modalOverlay.addEventListener('click', function (e) {
+      if (e.target === modalOverlay) closeAdminModal();
+    });
+  }
+}
+
+// Render the users list with optional filter
+function renderAdminUsersList(allUsers, filter) {
+  var listEl = document.getElementById('adminUsersList');
+  if (!listEl) return;
+
+  var filtered = [];
+  for (var i = 0; i < allUsers.length; i++) {
+    if (filter === 'all' || allUsers[i].role === filter) {
+      filtered.push(allUsers[i]);
+    }
+  }
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<p class="admin-empty">No users found</p>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var u = filtered[i];
+    var initials = adminInitials(u.name);
+    var avg = computeAvgRating(u.sessions);
+    var avgStr = avg > 0 ? avg.toFixed(1) : '—';
+    var colors = adminRoleColors[u.role] || adminRoleColors.coach;
+    var roleLabel = u.role.charAt(0).toUpperCase() + u.role.slice(1);
+    var joinDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+
+    html += '<div class="admin-user-card" data-email="' + u.email + '">' +
+      '<div class="admin-user-avatar" style="background:' + colors.bg + ';color:' + colors.text + ';border:1.5px solid ' + colors.border + '">' + initials + '</div>' +
+      '<div class="admin-user-info">' +
+      '<div class="admin-user-name">' + u.name + '</div>' +
+      '<div class="admin-user-email">' + u.email + '</div>' +
+      '<div class="admin-user-meta">' +
+      '<span class="admin-user-role-tag" style="background:' + colors.bg + ';color:' + colors.text + ';border:1px solid ' + colors.border + '">' + roleLabel + '</span>' +
+      '<span class="admin-user-joined">Joined ' + joinDate + '</span>' +
+      '</div>' +
+      '</div>' +
+      '<div class="admin-user-stats-mini">' +
+      '<div class="admin-mini-stat"><span class="admin-mini-val">' + u.sessions.length + '</span><span class="admin-mini-lbl">Sessions</span></div>' +
+      '<div class="admin-mini-stat"><span class="admin-mini-val">' + avgStr + '</span><span class="admin-mini-lbl">Avg ★</span></div>' +
+      '<div class="admin-mini-stat"><span class="admin-mini-val">' + u.totalHours + '</span><span class="admin-mini-lbl">Hours</span></div>' +
+      '</div>' +
+      '</div>';
+  }
+  listEl.innerHTML = html;
+
+  // Attach click handlers for detail modal
+  var cards = listEl.querySelectorAll('.admin-user-card');
+  for (var c = 0; c < cards.length; c++) {
+    (function (card) {
+      card.addEventListener('click', function () {
+        var email = card.getAttribute('data-email');
+        openAdminModal(email);
+      });
+    })(cards[c]);
+  }
+}
+
+// Open user detail modal
+function openAdminModal(email) {
+  getAllUsersData().then(function (allUsers) {
+    var user = null;
+    for (var i = 0; i < allUsers.length; i++) {
+      if (allUsers[i].email === email) { user = allUsers[i]; break; }
+    }
+    if (!user) return;
+    showAdminModalForUser(user);
+  });
+}
+
+function showAdminModalForUser(user) {
+
+  var modal = document.getElementById('adminModal');
+  if (!modal) return;
+
+  // Populate header
+  var colors = adminRoleColors[user.role] || adminRoleColors.coach;
+  var avatarEl = document.getElementById('modalAvatar');
+  if (avatarEl) {
+    avatarEl.textContent = adminInitials(user.name);
+    avatarEl.style.background = colors.bg;
+    avatarEl.style.color = colors.text;
+    avatarEl.style.border = '2px solid ' + colors.border;
+  }
+  var nameEl = document.getElementById('modalUserName');
+  if (nameEl) nameEl.textContent = user.name;
+  var emailEl = document.getElementById('modalUserEmail');
+  if (emailEl) emailEl.textContent = user.email;
+
+  // Stats
+  var avg = computeAvgRating(user.sessions);
+  var statsEl = document.getElementById('modalStats');
+  if (statsEl) {
+    var roleLabel = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+    statsEl.innerHTML =
+      '<div class="modal-stat"><span class="modal-stat-val" style="color:' + colors.text + '">' + roleLabel + '</span><span class="modal-stat-lbl">Role</span></div>' +
+      '<div class="modal-stat"><span class="modal-stat-val">' + user.sessions.length + '</span><span class="modal-stat-lbl">Sessions</span></div>' +
+      '<div class="modal-stat"><span class="modal-stat-val">' + (avg > 0 ? avg.toFixed(1) : '—') + '</span><span class="modal-stat-lbl">Avg Rating</span></div>' +
+      '<div class="modal-stat"><span class="modal-stat-val">' + user.totalHours + '</span><span class="modal-stat-lbl">Hours</span></div>' +
+      '<div class="modal-stat"><span class="modal-stat-val">' + (user.coachCity || '—') + '</span><span class="modal-stat-lbl">City</span></div>';
+  }
+
+  // Session History
+  var sessEl = document.getElementById('modalSessions');
+  if (sessEl) {
+    if (user.sessions.length === 0) {
+      sessEl.innerHTML = '<p class="admin-empty">No sessions logged yet</p>';
+    } else {
+      var shtml = '';
+      var questionLabels = {
+        pedagogical_pivot: 'Pedagogical Pivot',
+        local_analogy: 'Local Analogy',
+        inclusive_language: 'Inclusive Language',
+        cultural_constraint: 'Cultural Constraint',
+        athlete_voice: 'Athlete Voice'
+      };
+      // Show most recent first
+      var sessionsReversed = user.sessions.slice().reverse();
+      for (var s = 0; s < sessionsReversed.length; s++) {
+        var sess = sessionsReversed[s];
+        var date = sess.date ? new Date(sess.date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+        var ratingsHtml = '';
+        for (var q in sess.ratings) {
+          var label = questionLabels[q] || q;
+          var val = sess.ratings[q];
+          var starsHtml = '';
+          for (var st = 1; st <= 5; st++) {
+            starsHtml += '<span class="modal-star' + (st <= val ? ' filled' : '') + '">★</span>';
+          }
+          ratingsHtml += '<div class="modal-rating-row"><span class="modal-rating-q">' + label + '</span><span class="modal-rating-stars">' + starsHtml + '</span></div>';
+        }
+        shtml += '<div class="modal-session">' +
+          '<div class="modal-session-date">Session #' + (user.sessions.length - s) + ' — ' + date + '</div>' +
+          ratingsHtml +
+          '</div>';
+      }
+      sessEl.innerHTML = shtml;
+    }
+  }
+
+  modal.style.display = 'flex';
+  setTimeout(function () { modal.classList.add('open'); }, 10);
+
+  // ── Populate edit form ──
+  var editName = document.getElementById('editUserName');
+  var editRole = document.getElementById('editUserRole');
+  var editCity = document.getElementById('editUserCity');
+  if (editName) editName.value = user.name || '';
+  if (editRole) editRole.value = user.role || 'coach';
+  if (editCity) editCity.value = user.coachCity || '';
+
+  // Store current user uid for save/delete
+  modal.setAttribute('data-uid', user.uid || '');
+
+  // ── Save button ──
+  var saveBtn = document.getElementById('adminSaveBtn');
+  if (saveBtn) {
+    // Remove old listener by cloning
+    var newSave = saveBtn.cloneNode(true);
+    saveBtn.parentNode.replaceChild(newSave, saveBtn);
+    newSave.addEventListener('click', function () {
+      var uid = modal.getAttribute('data-uid');
+      if (!uid) return;
+      var newName = document.getElementById('editUserName').value.trim();
+      var newRole = document.getElementById('editUserRole').value;
+      var newCity = document.getElementById('editUserCity').value.trim();
+      if (!newName) { showToast('Name cannot be empty'); return; }
+
+      newSave.querySelector('span').textContent = 'Saving...';
+      db.collection('users').doc(uid).update({
+        name: newName,
+        role: newRole,
+        coachCity: newCity,
+        coachName: newName
+      }).then(function () {
+        newSave.querySelector('span').textContent = 'Save Changes';
+        showToast('✅ User updated successfully');
+        closeAdminModal();
+        setTimeout(renderAdminPanel, 300);
+      }).catch(function (err) {
+        newSave.querySelector('span').textContent = 'Save Changes';
+        showToast('❌ Error: ' + err.message);
+      });
+    });
+  }
+
+  // ── Delete button ──
+  var deleteBtn = document.getElementById('adminDeleteBtn');
+  if (deleteBtn) {
+    var newDel = deleteBtn.cloneNode(true);
+    deleteBtn.parentNode.replaceChild(newDel, deleteBtn);
+    newDel.addEventListener('click', function () {
+      var uid = modal.getAttribute('data-uid');
+      if (!uid) return;
+      var confirmDelete = confirm('⚠️ Are you sure you want to permanently delete this user?\n\nThis cannot be undone.');
+      if (!confirmDelete) return;
+
+      newDel.querySelector('span').textContent = 'Deleting...';
+      db.collection('users').doc(uid).delete().then(function () {
+        showToast('🗑️ User account deleted');
+        closeAdminModal();
+        setTimeout(renderAdminPanel, 300);
+      }).catch(function (err) {
+        newDel.querySelector('span').textContent = '🗑️ Delete Account';
+        showToast('❌ Error: ' + err.message);
+      });
+    });
+  }
+}
+
+function closeAdminModal() {
+  var modal = document.getElementById('adminModal');
+  if (modal) {
+    modal.classList.remove('open');
+    setTimeout(function () { modal.style.display = 'none'; }, 300);
+  }
+}
+
+// ════════════════════════════════════════════
+//  PROFILE NAME EDIT (Coach/Athlete)
+// ════════════════════════════════════════════
+
+function initProfileEdit() {
+  var toggleBtn = document.getElementById('editNameToggle');
+  var editForm = document.getElementById('profileEditForm');
+  var editInput = document.getElementById('profileEditName');
+  var saveBtn = document.getElementById('profileEditSave');
+
+  if (toggleBtn && editForm) {
+    toggleBtn.addEventListener('click', function () {
+      var isVisible = editForm.style.display !== 'none';
+      editForm.style.display = isVisible ? 'none' : 'flex';
+      if (!isVisible && editInput) {
+        var currentName = document.getElementById('dropdownName');
+        editInput.value = currentName ? currentName.textContent : '';
+        editInput.focus();
+      }
+    });
+  }
+
+  if (saveBtn && editInput) {
+    saveBtn.addEventListener('click', function () {
+      var newName = editInput.value.trim();
+      if (!newName) return;
+
+      var firebaseUser = auth.currentUser;
+      if (!firebaseUser) return;
+
+      saveBtn.textContent = 'Saving...';
+      db.collection('users').doc(firebaseUser.uid).update({
+        name: newName,
+        coachName: newName
+      }).then(function () {
+        // Update UI everywhere
+        var ddName = document.getElementById('dropdownName');
+        if (ddName) ddName.textContent = newName;
+
+        var avatarEl = document.getElementById('avatarInitials');
+        var ddAvatar = document.getElementById('dropdownAvatar');
+        var initials = newName.trim().split(/\s+/);
+        var ini = initials.length >= 2
+          ? (initials[0][0] + initials[initials.length - 1][0]).toUpperCase()
+          : newName.substring(0, 2).toUpperCase();
+        if (avatarEl) avatarEl.textContent = ini;
+        if (ddAvatar) ddAvatar.textContent = ini;
+
+        appData.coachName = newName;
+
+        saveBtn.textContent = 'Save';
+        editForm.style.display = 'none';
+        showToast('✅ Name updated!');
+      }).catch(function (err) {
+        saveBtn.textContent = 'Save';
+        showToast('❌ Error: ' + err.message);
+      });
+    });
+  }
+}
+
+// Initialize profile edit on DOM ready
+document.addEventListener('DOMContentLoaded', function () {
+  initProfileEdit();
+});

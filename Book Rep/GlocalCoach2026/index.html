@@ -16,329 +16,779 @@
 </head>
 
 <body>
-    <!-- ===== STATUS BAR ===== -->
-    <div class="status-bar">
-        <span class="status-time" id="statusTime">4:45</span>
-        <div class="status-icons">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
-            </svg>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z" />
-            </svg>
+    <!-- ===== AUTH SCREEN ===== -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-container">
+            <!-- Animated background particles -->
+            <div class="auth-particles" id="authParticles"></div>
+
+            <div class="auth-card">
+                <!-- Logo -->
+                <div class="auth-logo">
+                    <div class="auth-logo-mark">
+                        <span class="logo-g">G</span><span class="logo-c">C</span>
+                    </div>
+                    <h1 class="auth-logo-text">GlocalCoach</h1>
+                    <span class="auth-logo-year">2026</span>
+                </div>
+                <p class="auth-tagline">Your FIFA World Cup 26™ Digital Coaching Companion</p>
+
+                <!-- Tab Toggle -->
+                <div class="auth-toggle">
+                    <button class="auth-toggle-btn active" id="loginToggle" data-mode="login">Log In</button>
+                    <button class="auth-toggle-btn" id="signupToggle" data-mode="signup">Sign Up</button>
+                    <div class="auth-toggle-slider" id="authSlider"></div>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <form class="auth-form active" id="loginForm" autocomplete="off">
+                    <div class="auth-field">
+                        <label for="loginEmail">Email</label>
+                        <div class="auth-input-wrap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                            <input type="email" id="loginEmail" placeholder="coach@glocalcoach.com" required />
+                        </div>
+                    </div>
+                    <div class="auth-field">
+                        <label for="loginPassword">Password</label>
+                        <div class="auth-input-wrap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0110 0v4" />
+                            </svg>
+                            <input type="password" id="loginPassword" placeholder="Enter your password" required />
+                            <button type="button" class="auth-eye" id="loginEye" aria-label="Toggle password">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="auth-submit" id="loginSubmit">
+                        <span>Log In</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                    <a href="#" class="auth-forgot-link" id="forgotLink">Forgot password?</a>
+                    <p class="auth-footer-text">Don't have an account? <a href="#" id="goToSignup">Sign up</a></p>
+                </form>
+
+                <!-- FORGOT / RESET PASSWORD FORM -->
+                <div class="auth-form" id="forgotForm">
+                    <!-- Step 1: Enter Email -->
+                    <div class="forgot-step active" id="forgotStep1">
+                        <div class="forgot-icon">🔒</div>
+                        <h3 class="forgot-title">Forgot Password?</h3>
+                        <p class="forgot-desc">Enter your email and we'll send you a link to reset your password.</p>
+                        <div class="auth-field">
+                            <label for="forgotEmail">Email Address</label>
+                            <div class="auth-input-wrap">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                    <polyline points="22,6 12,13 2,6" />
+                                </svg>
+                                <input type="email" id="forgotEmail" placeholder="coach@glocalcoach.com" />
+                            </div>
+                        </div>
+                        <button type="button" class="auth-submit" id="forgotVerifyBtn">
+                            <span>Send Reset Link</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                        <a href="#" class="auth-back-link" id="forgotBackToLogin">← Back to Log In</a>
+                    </div>
+
+                    <!-- Step 2: Set New Password -->
+                    <div class="forgot-step" id="forgotStep2">
+                        <div class="forgot-icon">✅</div>
+                        <h3 class="forgot-title">Reset Password</h3>
+                        <p class="forgot-desc">Email verified! Create a new password below.</p>
+                        <p class="forgot-user-email" id="forgotVerifiedEmail"></p>
+                        <div class="auth-field">
+                            <label for="resetPassword">New Password</label>
+                            <div class="auth-input-wrap">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0110 0v4" />
+                                </svg>
+                                <input type="password" id="resetPassword" placeholder="Min 6 characters"
+                                    minlength="6" />
+                                <button type="button" class="auth-eye" id="resetEye" aria-label="Toggle password">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="auth-field">
+                            <label for="resetPasswordConfirm">Confirm New Password</label>
+                            <div class="auth-input-wrap">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0110 0v4" />
+                                </svg>
+                                <input type="password" id="resetPasswordConfirm" placeholder="Re-enter new password"
+                                    minlength="6" />
+                            </div>
+                        </div>
+                        <button type="button" class="auth-submit" id="resetSubmitBtn">
+                            <span>Reset Password</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                        <a href="#" class="auth-back-link" id="resetBackToLogin">← Back to Log In</a>
+                    </div>
+
+                    <!-- Step 3: Success -->
+                    <div class="forgot-step" id="forgotStep3">
+                        <div class="forgot-icon success-icon">📧</div>
+                        <h3 class="forgot-title">Check Your Email!</h3>
+                        <p class="forgot-desc">A password reset link has been sent to your email. Check your inbox and
+                            follow the link to create a new password.</p>
+                        <button type="button" class="auth-submit" id="resetGoLogin">
+                            <span>Go to Log In</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SIGNUP FORM -->
+                <form class="auth-form" id="signupForm" autocomplete="off">
+                    <div class="auth-field">
+                        <label for="signupName">Full Name</label>
+                        <div class="auth-input-wrap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            <input type="text" id="signupName" placeholder="John Doe" required />
+                        </div>
+                    </div>
+                    <div class="auth-field">
+                        <label for="signupEmail">Email</label>
+                        <div class="auth-input-wrap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                            <input type="email" id="signupEmail" placeholder="coach@glocalcoach.com" required />
+                        </div>
+                    </div>
+                    <div class="auth-field">
+                        <label for="signupPassword">Password</label>
+                        <div class="auth-input-wrap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0110 0v4" />
+                            </svg>
+                            <input type="password" id="signupPassword" placeholder="Min 6 characters" required
+                                minlength="6" />
+                            <button type="button" class="auth-eye" id="signupEye" aria-label="Toggle password">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <span class="strength-text" id="strengthText"></span>
+                        </div>
+                    </div>
+                    <div class="auth-field">
+                        <label>Select Your Role</label>
+                        <div class="role-selector" id="roleSelector">
+                            <button type="button" class="role-card active" data-role="coach">
+                                <div class="role-icon">🏆</div>
+                                <span class="role-name">Coach</span>
+                                <span class="role-desc">Full access to all coaching tools</span>
+                            </button>
+                            <button type="button" class="role-card" data-role="admin">
+                                <div class="role-icon">⚙️</div>
+                                <span class="role-name">Admin</span>
+                                <span class="role-desc">Manage teams & organizations</span>
+                            </button>
+                            <button type="button" class="role-card" data-role="athlete">
+                                <div class="role-icon">⚽</div>
+                                <span class="role-name">Athlete</span>
+                                <span class="role-desc">Track personal development</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="auth-submit" id="signupSubmit">
+                        <span>Create Account</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                    <p class="auth-footer-text">Already have an account? <a href="#" id="goToLogin">Log in</a></p>
+                </form>
+
+                <!-- Auth Error -->
+                <div class="auth-error" id="authError"></div>
+            </div>
         </div>
     </div>
 
-    <!-- ===== APP HEADER ===== -->
-    <header class="app-header">
-        <div class="header-content">
-            <div class="header-left">
-                <div class="logo-mark">
-                    <span class="logo-g">G</span><span class="logo-c">C</span>
-                </div>
-                <div class="header-title">
-                    <h1>GlocalCoach</h1>
-                    <span class="header-year">2026</span>
-                </div>
+    <!-- ===== APP WRAPPER (hidden until logged in) ===== -->
+    <div class="app-wrapper" id="appWrapper" style="display:none;">
+
+        <!-- ===== STATUS BAR ===== -->
+        <div class="status-bar">
+            <span class="status-time" id="statusTime">4:45</span>
+            <div class="status-icons">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
+                </svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z" />
+                </svg>
             </div>
-            <button class="header-avatar" id="profileBtn" aria-label="Profile">
-                <span>JD</span>
-            </button>
         </div>
-    </header>
 
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="app-main">
-
-        <!-- TAB 1: QUICK-LOG -->
-        <section class="tab-view active" id="tabQuickLog">
-            <div class="section-header">
-                <span class="section-tag">Post-Session</span>
-                <h2>Quick-Log</h2>
-                <p class="section-sub">Rate your session in 60 seconds</p>
-            </div>
-
-            <!-- Glocal Soul Meter -->
-            <div class="soul-meter-wrap">
-                <svg class="soul-meter" viewBox="0 0 200 200">
-                    <defs>
-                        <linearGradient id="soulGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="var(--accent-teal)" />
-                            <stop offset="50%" stop-color="var(--accent-gold)" />
-                            <stop offset="100%" stop-color="var(--accent-magenta)" />
-                        </linearGradient>
-                    </defs>
-                    <circle class="soul-track" cx="100" cy="100" r="85" />
-                    <circle class="soul-fill" id="soulFill" cx="100" cy="100" r="85" />
-                    <text x="100" y="92" class="soul-value" id="soulValue">0%</text>
-                    <text x="100" y="115" class="soul-label">Glocal Soul</text>
-                </svg>
-            </div>
-
-            <!-- Swipe Cards -->
-            <div class="swipe-deck" id="swipeDeck">
-                <div class="swipe-card active" data-index="0">
-                    <span class="card-num">1 / 5</span>
-                    <h3>Pedagogical Pivot</h3>
-                    <p>Did I ask more questions than I gave commands during this session?</p>
-                    <div class="star-rating" data-question="pedagogical_pivot">
-                        <button class="star" data-val="1">★</button>
-                        <button class="star" data-val="2">★</button>
-                        <button class="star" data-val="3">★</button>
-                        <button class="star" data-val="4">★</button>
-                        <button class="star" data-val="5">★</button>
+        <!-- ===== APP HEADER ===== -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="logo-mark">
+                        <span class="logo-g">G</span><span class="logo-c">C</span>
                     </div>
-                    <span class="rating-label" id="ratingLabel0">Tap to rate</span>
-                </div>
-
-                <div class="swipe-card" data-index="1">
-                    <span class="card-num">2 / 5</span>
-                    <h3>Local Analogy</h3>
-                    <p>Did I use a culturally relevant analogy or metaphor to explain a concept?</p>
-                    <div class="star-rating" data-question="local_analogy">
-                        <button class="star" data-val="1">★</button>
-                        <button class="star" data-val="2">★</button>
-                        <button class="star" data-val="3">★</button>
-                        <button class="star" data-val="4">★</button>
-                        <button class="star" data-val="5">★</button>
-                    </div>
-                    <span class="rating-label" id="ratingLabel1">Tap to rate</span>
-                </div>
-
-                <div class="swipe-card" data-index="2">
-                    <span class="card-num">3 / 5</span>
-                    <h3>Inclusive Language</h3>
-                    <p>Did I adapt my language to be inclusive of all athletes' backgrounds?</p>
-                    <div class="star-rating" data-question="inclusive_language">
-                        <button class="star" data-val="1">★</button>
-                        <button class="star" data-val="2">★</button>
-                        <button class="star" data-val="3">★</button>
-                        <button class="star" data-val="4">★</button>
-                        <button class="star" data-val="5">★</button>
-                    </div>
-                    <span class="rating-label" id="ratingLabel2">Tap to rate</span>
-                </div>
-
-                <div class="swipe-card" data-index="3">
-                    <span class="card-num">4 / 5</span>
-                    <h3>Cultural Constraint</h3>
-                    <p>Did I incorporate a local cultural constraint into my global tactical plan?</p>
-                    <div class="star-rating" data-question="cultural_constraint">
-                        <button class="star" data-val="1">★</button>
-                        <button class="star" data-val="2">★</button>
-                        <button class="star" data-val="3">★</button>
-                        <button class="star" data-val="4">★</button>
-                        <button class="star" data-val="5">★</button>
-                    </div>
-                    <span class="rating-label" id="ratingLabel3">Tap to rate</span>
-                </div>
-
-                <div class="swipe-card" data-index="4">
-                    <span class="card-num">5 / 5</span>
-                    <h3>Athlete Voice</h3>
-                    <p>Did I create space for athletes to share their perspectives and experiences?</p>
-                    <div class="star-rating" data-question="athlete_voice">
-                        <button class="star" data-val="1">★</button>
-                        <button class="star" data-val="2">★</button>
-                        <button class="star" data-val="3">★</button>
-                        <button class="star" data-val="4">★</button>
-                        <button class="star" data-val="5">★</button>
-                    </div>
-                    <span class="rating-label" id="ratingLabel4">Tap to rate</span>
-                </div>
-            </div>
-
-            <div class="swipe-nav">
-                <button class="btn-outline" id="prevCard" disabled>← Previous</button>
-                <div class="swipe-dots" id="swipeDots"></div>
-                <button class="btn-outline" id="nextCard">Next →</button>
-            </div>
-
-            <button class="btn-primary" id="submitLog" style="display:none;">
-                <span>Submit Quick-Log</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-            </button>
-        </section>
-
-        <!-- TAB 2: CQ DASHBOARD -->
-        <section class="tab-view" id="tabDashboard">
-            <div class="section-header">
-                <span class="section-tag">Real-Time Insights</span>
-                <h2>CQ Dashboard</h2>
-                <p class="section-sub">Your Cultural Intelligence at a glance</p>
-            </div>
-
-            <div class="radar-container">
-                <canvas id="radarChart" width="340" height="340"></canvas>
-            </div>
-
-            <div class="cq-legend">
-                <div class="legend-item"><span class="dot dot-drive"></span>Drive</div>
-                <div class="legend-item"><span class="dot dot-knowledge"></span>Knowledge</div>
-                <div class="legend-item"><span class="dot dot-strategy"></span>Strategy</div>
-                <div class="legend-item"><span class="dot dot-action"></span>Action</div>
-            </div>
-
-            <div class="benchmark-cards">
-                <div class="bench-card">
-                    <div class="bench-icon">🎯</div>
-                    <div class="bench-info">
-                        <span class="bench-label">Ontario Soccer DEI</span>
-                        <div class="bench-bar">
-                            <div class="bench-fill" id="deiFill" style="width:0%"></div>
-                        </div>
-                        <span class="bench-val" id="deiVal">0%</span>
+                    <div class="header-title">
+                        <h1>GlocalCoach</h1>
+                        <span class="header-year">2026</span>
                     </div>
                 </div>
-                <div class="bench-card">
-                    <div class="bench-icon">🛡️</div>
-                    <div class="bench-info">
-                        <span class="bench-label">Safe Sport Standards</span>
-                        <div class="bench-bar">
-                            <div class="bench-fill fill-gold" id="safeFill" style="width:0%"></div>
-                        </div>
-                        <span class="bench-val" id="safeVal">0%</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="trend-section">
-                <h3>Session Trend</h3>
-                <canvas id="trendChart" width="340" height="120"></canvas>
-            </div>
-        </section>
-
-        <!-- TAB 3: RESOURCE LIBRARY -->
-        <section class="tab-view" id="tabLibrary">
-            <div class="section-header">
-                <span class="section-tag">Glocal Resources</span>
-                <h2>Resource Library</h2>
-                <p class="section-sub">Curated content for your Host City</p>
-            </div>
-
-            <div class="search-bar">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="M21 21l-4.35-4.35" />
-                </svg>
-                <input type="text" id="searchInput" placeholder="Search resources…" />
-            </div>
-
-            <div class="filter-chips" id="filterChips">
-                <button class="chip active" data-cat="all">All</button>
-                <button class="chip" data-cat="multilingual">Multilingual Toolkits</button>
-                <button class="chip" data-cat="indigenous">Indigenous Protocols</button>
-                <button class="chip" data-cat="fifa">FIFA Micro-Learning</button>
-                <button class="chip" data-cat="dei">DEI Guides</button>
-            </div>
-
-            <div class="resource-grid" id="resourceGrid">
-                <!-- populated by JS -->
-            </div>
-        </section>
-
-        <!-- TAB 4: LEGACY LEDGER -->
-        <section class="tab-view" id="tabLedger">
-            <div class="section-header">
-                <span class="section-tag">Legacy Handover</span>
-                <h2>Impact Ledger</h2>
-                <p class="section-sub">Your pathway to the Glocal ROI Certificate</p>
-            </div>
-
-            <div class="ledger-ring-wrap">
-                <svg class="ledger-ring" viewBox="0 0 200 200">
-                    <circle class="ring-track" cx="100" cy="100" r="85" />
-                    <circle class="ring-fill" id="hoursRingFill" cx="100" cy="100" r="85" />
-                    <text x="100" y="88" class="ring-value" id="hoursValue">0</text>
-                    <text x="100" y="108" class="ring-unit">/ 100 hrs</text>
-                    <text x="100" y="128" class="ring-sub">Community Impact</text>
-                </svg>
-            </div>
-
-            <div class="hours-input-row">
-                <label for="addHours">Log Impact Hours</label>
-                <div class="hours-control">
-                    <button class="hours-btn" id="hoursDown">−</button>
-                    <input type="number" id="addHours" value="1" min="0.5" step="0.5" />
-                    <button class="hours-btn" id="hoursUp">+</button>
-                </div>
-                <button class="btn-primary small" id="logHoursBtn">Log Hours</button>
-            </div>
-
-            <div class="certificate-section" id="certSection">
-                <h3>Glocal ROI Certificate</h3>
-                <div class="cert-form">
-                    <label for="coachName">Coach Name</label>
-                    <input type="text" id="coachName" placeholder="Enter your full name" />
-                    <label for="coachCity">Host City</label>
-                    <select id="coachCity">
-                        <option value="Toronto">Toronto</option>
-                        <option value="Vancouver">Vancouver</option>
-                        <option value="Mexico City">Mexico City</option>
-                        <option value="New York/New Jersey">New York / New Jersey</option>
-                        <option value="Los Angeles">Los Angeles</option>
-                        <option value="Dallas">Dallas</option>
-                        <option value="Houston">Houston</option>
-                        <option value="Miami">Miami</option>
-                        <option value="Philadelphia">Philadelphia</option>
-                        <option value="Seattle">Seattle</option>
-                        <option value="San Francisco">San Francisco Bay Area</option>
-                        <option value="Kansas City">Kansas City</option>
-                        <option value="Atlanta">Atlanta</option>
-                        <option value="Boston">Boston</option>
-                        <option value="Guadalajara">Guadalajara</option>
-                        <option value="Monterrey">Monterrey</option>
-                    </select>
-                    <button class="btn-primary" id="generateCert">
-                        <span>Generate Certificate</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M12 15V3m0 12l-4-4m4 4l4-4" />
-                            <path d="M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17" />
-                        </svg>
+                <div class="header-right">
+                    <span class="header-role-badge" id="headerRoleBadge">Coach</span>
+                    <button class="header-avatar" id="profileBtn" aria-label="Profile">
+                        <span id="avatarInitials">JD</span>
                     </button>
                 </div>
+                <!-- Profile Dropdown -->
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-dropdown-header">
+                        <div class="profile-dropdown-avatar" id="dropdownAvatar">JD</div>
+                        <div class="profile-dropdown-info">
+                            <span class="profile-dropdown-name" id="dropdownName">John Doe</span>
+                            <span class="profile-dropdown-email" id="dropdownEmail">john@email.com</span>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-divider"></div>
+                    <div class="profile-dropdown-role">
+                        <span class="profile-dropdown-role-label">Role</span>
+                        <span class="profile-dropdown-role-value" id="dropdownRole">Coach</span>
+                    </div>
+                    <div class="profile-dropdown-divider"></div>
+                    <!-- Edit Name Section -->
+                    <div class="profile-edit-section" id="profileEditSection">
+                        <button class="profile-edit-toggle" id="editNameToggle">✏️ Edit Name</button>
+                        <div class="profile-edit-form" id="profileEditForm" style="display:none;">
+                            <input type="text" id="profileEditName" placeholder="Your new name" />
+                            <button class="profile-edit-save" id="profileEditSave">Save</button>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-divider"></div>
+                    <button class="profile-dropdown-logout" id="logoutBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        <span>Log Out</span>
+                    </button>
+                </div>
+            </div>
+        </header>
 
-                <div class="certificate-preview" id="certPreview" style="display:none;">
-                    <div class="certificate" id="certificateCard">
-                        <div class="cert-border">
-                            <div class="cert-header">
-                                <div class="cert-logo">GC</div>
-                                <h2>Glocal ROI Certificate</h2>
-                                <p class="cert-subtitle">Intercultural Skills in Sport</p>
+        <!-- Welcome Banner -->
+        <div class="welcome-banner" id="welcomeBanner" style="display:none;">
+            <span class="welcome-emoji">👋</span>
+            <div class="welcome-text">
+                <strong id="welcomeName">Welcome back!</strong>
+                <span id="welcomeRole">Coach • Ready to log your next session</span>
+            </div>
+            <button class="welcome-close" id="welcomeClose">✕</button>
+        </div>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <main class="app-main">
+
+            <!-- TAB 1: QUICK-LOG -->
+            <section class="tab-view active" id="tabQuickLog">
+                <div class="section-header">
+                    <span class="section-tag">Post-Session</span>
+                    <h2>Quick-Log</h2>
+                    <p class="section-sub">Rate your session in 60 seconds</p>
+                </div>
+
+                <!-- Glocal Soul Meter -->
+                <div class="soul-meter-wrap">
+                    <svg class="soul-meter" viewBox="0 0 200 200">
+                        <defs>
+                            <linearGradient id="soulGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="var(--accent-teal)" />
+                                <stop offset="50%" stop-color="var(--accent-gold)" />
+                                <stop offset="100%" stop-color="var(--accent-magenta)" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="soul-track" cx="100" cy="100" r="85" />
+                        <circle class="soul-fill" id="soulFill" cx="100" cy="100" r="85" />
+                        <text x="100" y="92" class="soul-value" id="soulValue">0%</text>
+                        <text x="100" y="115" class="soul-label">Glocal Soul</text>
+                    </svg>
+                </div>
+
+                <!-- Swipe Cards -->
+                <div class="swipe-deck" id="swipeDeck">
+                    <div class="swipe-card active" data-index="0">
+                        <span class="card-num">1 / 5</span>
+                        <h3>Pedagogical Pivot</h3>
+                        <p>Did I ask more questions than I gave commands during this session?</p>
+                        <div class="star-rating" data-question="pedagogical_pivot">
+                            <button class="star" data-val="1">★</button>
+                            <button class="star" data-val="2">★</button>
+                            <button class="star" data-val="3">★</button>
+                            <button class="star" data-val="4">★</button>
+                            <button class="star" data-val="5">★</button>
+                        </div>
+                        <span class="rating-label" id="ratingLabel0">Tap to rate</span>
+                    </div>
+
+                    <div class="swipe-card" data-index="1">
+                        <span class="card-num">2 / 5</span>
+                        <h3>Local Analogy</h3>
+                        <p>Did I use a culturally relevant analogy or metaphor to explain a concept?</p>
+                        <div class="star-rating" data-question="local_analogy">
+                            <button class="star" data-val="1">★</button>
+                            <button class="star" data-val="2">★</button>
+                            <button class="star" data-val="3">★</button>
+                            <button class="star" data-val="4">★</button>
+                            <button class="star" data-val="5">★</button>
+                        </div>
+                        <span class="rating-label" id="ratingLabel1">Tap to rate</span>
+                    </div>
+
+                    <div class="swipe-card" data-index="2">
+                        <span class="card-num">3 / 5</span>
+                        <h3>Inclusive Language</h3>
+                        <p>Did I adapt my language to be inclusive of all athletes' backgrounds?</p>
+                        <div class="star-rating" data-question="inclusive_language">
+                            <button class="star" data-val="1">★</button>
+                            <button class="star" data-val="2">★</button>
+                            <button class="star" data-val="3">★</button>
+                            <button class="star" data-val="4">★</button>
+                            <button class="star" data-val="5">★</button>
+                        </div>
+                        <span class="rating-label" id="ratingLabel2">Tap to rate</span>
+                    </div>
+
+                    <div class="swipe-card" data-index="3">
+                        <span class="card-num">4 / 5</span>
+                        <h3>Cultural Constraint</h3>
+                        <p>Did I incorporate a local cultural constraint into my global tactical plan?</p>
+                        <div class="star-rating" data-question="cultural_constraint">
+                            <button class="star" data-val="1">★</button>
+                            <button class="star" data-val="2">★</button>
+                            <button class="star" data-val="3">★</button>
+                            <button class="star" data-val="4">★</button>
+                            <button class="star" data-val="5">★</button>
+                        </div>
+                        <span class="rating-label" id="ratingLabel3">Tap to rate</span>
+                    </div>
+
+                    <div class="swipe-card" data-index="4">
+                        <span class="card-num">5 / 5</span>
+                        <h3>Athlete Voice</h3>
+                        <p>Did I create space for athletes to share their perspectives and experiences?</p>
+                        <div class="star-rating" data-question="athlete_voice">
+                            <button class="star" data-val="1">★</button>
+                            <button class="star" data-val="2">★</button>
+                            <button class="star" data-val="3">★</button>
+                            <button class="star" data-val="4">★</button>
+                            <button class="star" data-val="5">★</button>
+                        </div>
+                        <span class="rating-label" id="ratingLabel4">Tap to rate</span>
+                    </div>
+                </div>
+
+                <div class="swipe-nav">
+                    <button class="btn-outline" id="prevCard" disabled>← Previous</button>
+                    <div class="swipe-dots" id="swipeDots"></div>
+                    <button class="btn-outline" id="nextCard">Next →</button>
+                </div>
+
+                <button class="btn-primary" id="submitLog" style="display:none;">
+                    <span>Submit Quick-Log</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </section>
+
+            <!-- TAB 2: CQ DASHBOARD -->
+            <section class="tab-view" id="tabDashboard">
+                <div class="section-header">
+                    <span class="section-tag">Real-Time Insights</span>
+                    <h2>CQ Dashboard</h2>
+                    <p class="section-sub">Your Cultural Intelligence at a glance</p>
+                </div>
+
+                <div class="radar-container">
+                    <canvas id="radarChart" width="340" height="340"></canvas>
+                </div>
+
+                <div class="cq-legend">
+                    <div class="legend-item"><span class="dot dot-drive"></span>Drive</div>
+                    <div class="legend-item"><span class="dot dot-knowledge"></span>Knowledge</div>
+                    <div class="legend-item"><span class="dot dot-strategy"></span>Strategy</div>
+                    <div class="legend-item"><span class="dot dot-action"></span>Action</div>
+                </div>
+
+                <div class="benchmark-cards">
+                    <div class="bench-card">
+                        <div class="bench-icon">🎯</div>
+                        <div class="bench-info">
+                            <span class="bench-label">Ontario Soccer DEI</span>
+                            <div class="bench-bar">
+                                <div class="bench-fill" id="deiFill" style="width:0%"></div>
                             </div>
-                            <div class="cert-body">
-                                <p class="cert-text">This certifies that</p>
-                                <h3 class="cert-name" id="certNameDisplay">—</h3>
-                                <p class="cert-text">has successfully completed</p>
-                                <div class="cert-hours-display">
-                                    <span class="cert-hours-num" id="certHoursDisplay">0</span>
-                                    <span>Community Impact Hours</span>
-                                </div>
-                                <p class="cert-text">during the FIFA World Cup 26™ coaching cycle</p>
-                                <p class="cert-city" id="certCityDisplay">Toronto</p>
+                            <span class="bench-val" id="deiVal">0%</span>
+                        </div>
+                    </div>
+                    <div class="bench-card">
+                        <div class="bench-icon">🛡️</div>
+                        <div class="bench-info">
+                            <span class="bench-label">Safe Sport Standards</span>
+                            <div class="bench-bar">
+                                <div class="bench-fill fill-gold" id="safeFill" style="width:0%"></div>
                             </div>
-                            <div class="cert-footer">
-                                <div class="cert-date" id="certDate"></div>
-                                <div class="cert-badges">
-                                    <span class="cert-badge">FIFA 2026</span>
-                                    <span class="cert-badge">CAC Verified</span>
-                                    <span class="cert-badge">OSIC 2026</span>
+                            <span class="bench-val" id="safeVal">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trend-section">
+                    <h3>Session Trend</h3>
+                    <canvas id="trendChart" width="340" height="120"></canvas>
+                </div>
+            </section>
+
+            <!-- TAB 3: RESOURCE LIBRARY -->
+            <section class="tab-view" id="tabLibrary">
+                <div class="section-header">
+                    <span class="section-tag">Glocal Resources</span>
+                    <h2>Resource Library</h2>
+                    <p class="section-sub">Curated content for your Host City</p>
+                </div>
+
+                <div class="search-bar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search resources…" />
+                </div>
+
+                <div class="filter-chips" id="filterChips">
+                    <button class="chip active" data-cat="all">All</button>
+                    <button class="chip" data-cat="multilingual">Multilingual Toolkits</button>
+                    <button class="chip" data-cat="indigenous">Indigenous Protocols</button>
+                    <button class="chip" data-cat="fifa">FIFA Micro-Learning</button>
+                    <button class="chip" data-cat="dei">DEI Guides</button>
+                </div>
+
+                <div class="resource-grid" id="resourceGrid">
+                    <!-- populated by JS -->
+                </div>
+            </section>
+
+            <!-- TAB 4: LEGACY LEDGER -->
+            <section class="tab-view" id="tabLedger">
+                <div class="section-header">
+                    <span class="section-tag">Legacy Handover</span>
+                    <h2>Impact Ledger</h2>
+                    <p class="section-sub">Your pathway to the Glocal ROI Certificate</p>
+                </div>
+
+                <div class="ledger-ring-wrap">
+                    <svg class="ledger-ring" viewBox="0 0 200 200">
+                        <circle class="ring-track" cx="100" cy="100" r="85" />
+                        <circle class="ring-fill" id="hoursRingFill" cx="100" cy="100" r="85" />
+                        <text x="100" y="88" class="ring-value" id="hoursValue">0</text>
+                        <text x="100" y="108" class="ring-unit">/ 100 hrs</text>
+                        <text x="100" y="128" class="ring-sub">Community Impact</text>
+                    </svg>
+                </div>
+
+                <div class="hours-input-row">
+                    <label for="addHours">Log Impact Hours</label>
+                    <div class="hours-control">
+                        <button class="hours-btn" id="hoursDown">−</button>
+                        <input type="number" id="addHours" value="1" min="0.5" step="0.5" />
+                        <button class="hours-btn" id="hoursUp">+</button>
+                    </div>
+                    <button class="btn-primary small" id="logHoursBtn">Log Hours</button>
+                </div>
+
+                <div class="certificate-section" id="certSection">
+                    <h3>Glocal ROI Certificate</h3>
+                    <div class="cert-form">
+                        <label for="coachName">Coach Name</label>
+                        <input type="text" id="coachName" placeholder="Enter your full name" />
+                        <label for="coachCity">Host City</label>
+                        <select id="coachCity">
+                            <option value="Toronto">Toronto</option>
+                            <option value="Vancouver">Vancouver</option>
+                            <option value="Mexico City">Mexico City</option>
+                            <option value="New York/New Jersey">New York / New Jersey</option>
+                            <option value="Los Angeles">Los Angeles</option>
+                            <option value="Dallas">Dallas</option>
+                            <option value="Houston">Houston</option>
+                            <option value="Miami">Miami</option>
+                            <option value="Philadelphia">Philadelphia</option>
+                            <option value="Seattle">Seattle</option>
+                            <option value="San Francisco">San Francisco Bay Area</option>
+                            <option value="Kansas City">Kansas City</option>
+                            <option value="Atlanta">Atlanta</option>
+                            <option value="Boston">Boston</option>
+                            <option value="Guadalajara">Guadalajara</option>
+                            <option value="Monterrey">Monterrey</option>
+                        </select>
+                        <button class="btn-primary" id="generateCert">
+                            <span>Generate Certificate</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 15V3m0 12l-4-4m4 4l4-4" />
+                                <path d="M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="certificate-preview" id="certPreview" style="display:none;">
+                        <div class="certificate" id="certificateCard">
+                            <div class="cert-border">
+                                <div class="cert-header">
+                                    <div class="cert-logo">GC</div>
+                                    <h2>Glocal ROI Certificate</h2>
+                                    <p class="cert-subtitle">Intercultural Skills in Sport</p>
                                 </div>
-                                <p class="cert-pathway">Portable credential for the 2028 Olympic pathway</p>
+                                <div class="cert-body">
+                                    <p class="cert-text">This certifies that</p>
+                                    <h3 class="cert-name" id="certNameDisplay">—</h3>
+                                    <p class="cert-text">has successfully completed</p>
+                                    <div class="cert-hours-display">
+                                        <span class="cert-hours-num" id="certHoursDisplay">0</span>
+                                        <span>Community Impact Hours</span>
+                                    </div>
+                                    <p class="cert-text">during the FIFA World Cup 26™ coaching cycle</p>
+                                    <p class="cert-city" id="certCityDisplay">Toronto</p>
+                                </div>
+                                <div class="cert-footer">
+                                    <div class="cert-date" id="certDate"></div>
+                                    <div class="cert-badges">
+                                        <span class="cert-badge">FIFA 2026</span>
+                                        <span class="cert-badge">CAC Verified</span>
+                                        <span class="cert-badge">OSIC 2026</span>
+                                    </div>
+                                    <p class="cert-pathway">Portable credential for the 2028 Olympic pathway</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-outline" id="printCert">🖨️ Print Certificate</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: ADMIN PANEL (admin role only) -->
+            <section class="tab-view" id="tabAdmin">
+                <div class="section-header">
+                    <span class="section-tag">Administration</span>
+                    <h2>Admin Panel</h2>
+                    <p class="section-sub">Overview of all users, ratings & progress</p>
+                </div>
+
+                <!-- Stats Overview Cards -->
+                <div class="admin-stats-grid" id="adminStatsGrid">
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon">👥</div>
+                        <div class="admin-stat-info">
+                            <span class="admin-stat-value" id="statTotalUsers">0</span>
+                            <span class="admin-stat-label">Total Users</span>
+                        </div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon">📝</div>
+                        <div class="admin-stat-info">
+                            <span class="admin-stat-value" id="statTotalSessions">0</span>
+                            <span class="admin-stat-label">Total Sessions</span>
+                        </div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon">⭐</div>
+                        <div class="admin-stat-info">
+                            <span class="admin-stat-value" id="statAvgRating">—</span>
+                            <span class="admin-stat-label">Avg Rating</span>
+                        </div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon">⏱️</div>
+                        <div class="admin-stat-info">
+                            <span class="admin-stat-value" id="statTotalHours">0</span>
+                            <span class="admin-stat-label">Total Hours</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Role Breakdown -->
+                <div class="admin-section-card">
+                    <h3>📊 Role Distribution</h3>
+                    <div class="admin-role-bars" id="adminRoleBars">
+                        <!-- populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="admin-section-card">
+                    <div class="admin-section-header">
+                        <h3>👥 All Users</h3>
+                        <div class="admin-filter-wrap">
+                            <select id="adminRoleFilter" class="admin-select">
+                                <option value="all">All Roles</option>
+                                <option value="coach">Coaches</option>
+                                <option value="admin">Admins</option>
+                                <option value="athlete">Athletes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="admin-users-list" id="adminUsersList">
+                        <!-- populated by JS -->
+                    </div>
+                </div>
+
+                <!-- User Detail Modal -->
+                <div class="admin-modal-overlay" id="adminModal" style="display:none;">
+                    <div class="admin-modal">
+                        <div class="admin-modal-header">
+                            <div class="admin-modal-avatar" id="modalAvatar">??</div>
+                            <div class="admin-modal-info">
+                                <h3 id="modalUserName">User Name</h3>
+                                <span id="modalUserEmail">user@email.com</span>
+                            </div>
+                            <button class="admin-modal-close" id="modalClose">✕</button>
+                        </div>
+                        <div class="admin-modal-body">
+                            <div class="admin-modal-stats" id="modalStats">
+                                <!-- populated by JS -->
+                            </div>
+
+                            <!-- Admin Edit Form -->
+                            <div class="admin-modal-section">
+                                <h4>✏️ Edit User</h4>
+                                <div class="admin-edit-form" id="adminEditForm">
+                                    <div class="admin-edit-field">
+                                        <label>Name</label>
+                                        <input type="text" id="editUserName" placeholder="Full Name" />
+                                    </div>
+                                    <div class="admin-edit-field">
+                                        <label>Role</label>
+                                        <select id="editUserRole">
+                                            <option value="coach">🏆 Coach</option>
+                                            <option value="admin">⚙️ Admin</option>
+                                            <option value="athlete">⚽ Athlete</option>
+                                        </select>
+                                    </div>
+                                    <div class="admin-edit-field">
+                                        <label>City</label>
+                                        <input type="text" id="editUserCity" placeholder="City" />
+                                    </div>
+                                    <button class="admin-save-btn" id="adminSaveBtn">
+                                        <span>Save Changes</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="admin-modal-section">
+                                <h4>Session History</h4>
+                                <div class="admin-modal-sessions" id="modalSessions">
+                                    <!-- populated by JS -->
+                                </div>
+                            </div>
+
+                            <!-- Delete Account -->
+                            <div class="admin-modal-section admin-danger-zone">
+                                <h4>⚠️ Danger Zone</h4>
+                                <p class="admin-danger-text">Permanently delete this user account and all their data.
+                                </p>
+                                <button class="admin-delete-btn" id="adminDeleteBtn">
+                                    <span>🗑️ Delete Account</span>
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <button class="btn-outline" id="printCert">🖨️ Print Certificate</button>
                 </div>
-            </div>
-        </section>
+            </section>
 
-    </main>
+            <!-- ===== APP FOOTER ===== -->
+            <footer class="app-footer">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <span class="footer-logo-g">G</span><span class="footer-logo-c">C</span>
+                    </div>
+                    <span class="footer-brand-name">GlocalCoach <span class="footer-year">2026</span></span>
+                </div>
+                <p class="footer-tagline">Intercultural Coaching Intelligence for the FIFA World Cup 26™</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">About</a>
+                    <span class="footer-dot">·</span>
+                    <a href="#" class="footer-link">Privacy</a>
+                    <span class="footer-dot">·</span>
+                    <a href="#" class="footer-link">Terms</a>
+                    <span class="footer-dot">·</span>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+                <div class="footer-badges">
+                    <span class="footer-badge">FIFA 2026</span>
+                    <span class="footer-badge">CAC Verified</span>
+                    <span class="footer-badge">OSIC 2026</span>
+                </div>
+                <p class="footer-copy">&copy; 2026 GlocalCoach. All rights reserved.</p>
+            </footer>
+
+        </main>
+
+    </div><!-- end .app-wrapper -->
 
     <!-- ===== BOTTOM NAV ===== -->
     <nav class="bottom-nav" id="bottomNav">
@@ -370,12 +820,27 @@
             </svg>
             <span>Legacy</span>
         </button>
+        <button class="nav-item admin-nav-item" data-tab="tabAdmin" onclick="switchTab('tabAdmin')" id="adminNavBtn"
+            style="display:none;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+                <path
+                    d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+            </svg>
+            <span>Admin</span>
+        </button>
     </nav>
 
     <!-- ===== TOAST ===== -->
     <div class="toast" id="toast"></div>
 
+    <!-- Firebase SDK (compat for plain JS) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="app.js"></script>
+    <script src="auth.js"></script>
 </body>
 
 </html>
