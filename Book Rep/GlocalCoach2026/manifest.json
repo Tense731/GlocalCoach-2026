@@ -1,0 +1,22 @@
+{
+  "name": "GlocalCoach 2026",
+  "short_name": "GlocalCoach",
+  "description": "The digital companion for FIFA World Cup 26™ coaching excellence. Bridge Universal coaching with Particular local performance.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0e1a",
+  "theme_color": "#14b8a6",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "education", "productivity"],
+  "lang": "en",
+  "dir": "ltr"
+}
